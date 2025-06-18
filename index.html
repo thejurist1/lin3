@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>성공하는 개새끼들의 아침 루틴 빌더</title>
+    <!-- Chosen Palette: Warm Neutrality -->
+    <!-- Application Structure Plan: The original linear newsletter is transformed into a three-part interactive application: 1) '왜 해야 하는가' (Why): A powerful introduction to grab attention. 2) '어떻게 하는가' (How): An interactive explorer for the 6 core routines, allowing users to click and view details without scrolling endlessly. 3) '이제 뭘 할까' (What Now): A personalized routine builder where users select routines, which dynamically generates a checklist and updates a donut chart. This task-oriented, non-linear structure turns passive reading into active commitment, making the information more actionable and engaging. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Main title and intro -> Goal: Motivate -> Presentation: Large, bold typography -> Interaction: None -> Justification: Immediately sets the aggressive, motivational tone of the original report.
+        - Report Info: 6 core routines list -> Goal: Organize & Explore -> Presentation: Interactive HTML/Tailwind cards -> Interaction: Click/Tap -> Justification: Allows users to focus on one concept at a time in a digestible format, improving engagement over a long text block.
+        - Report Info: Detailed routine descriptions -> Goal: Inform -> Presentation: Dynamic content panel -> Interaction: Populates on card click -> Justification: Keeps the main interface clean and focused, providing details on demand.
+        - Report Info: User's commitment to routines -> Goal: Personalize & Engage -> Presentation: Checkbox selection -> Interaction: User checks/unchecks items -> Justification: Transforms the user from a passive reader to an active participant, increasing the likelihood of follow-through.
+        - Report Info: Summary of committed routines -> Goal: Summarize & Compare -> Viz/Method: Donut Chart (Chart.js/Canvas) -> Interaction: Updates dynamically on checkbox interaction -> Justification: Provides instant visual feedback on the user's commitment, making the abstract goal feel concrete and trackable.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .tab-active {
+            border-color: #c2410c;
+            color: #c2410c;
+            font-weight: 700;
+        }
+        .card-active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #fb923c;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <div class="container mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-stone-900">
+                성공하는 개새끼들의 아침 루틴?
+            </h1>
+            <p class="text-lg sm:text-xl text-stone-600 mt-2">
+                개소리 말고, 여기서 니 루틴을 직접 만들어 봐라!
+            </p>
+        </header>
+
+        <div class="w-full bg-white rounded-xl shadow-lg p-6 md:p-8">
+            
+            <!-- Navigation Tabs -->
+            <nav class="flex border-b-2 border-stone-200 mb-6">
+                <button data-tab="intro" class="flex-1 py-3 text-center text-sm sm:text-base border-b-4 tab-active transition-colors duration-300">1. 왜 해야 하는가</button>
+                <button data-tab="explorer" class="flex-1 py-3 text-center text-sm sm:text-base border-b-4 border-transparent text-stone-500 hover:text-stone-800 transition-colors duration-300">2. 어떻게 하는가</button>
+                <button data-tab="builder" class="flex-1 py-3 text-center text-sm sm:text-base border-b-4 border-transparent text-stone-500 hover:text-stone-800 transition-colors duration-300">3. 이제 뭘 할까</button>
+            </nav>
+
+            <!-- Tab Content -->
+            <div id="tabContent">
+                
+                <!-- Intro Tab -->
+                <section id="intro" class="fade-in">
+                    <div class="prose max-w-none prose-stone">
+                        <h2 class="text-2xl font-bold text-orange-700">야, 정신 차려! 아침이 니 인생을 바꾼다!</h2>
+                        <p class="text-lg">
+                            이 앱은 단순히 성공 비법을 알려주는 곳이 아니다. 니가 매일 아침 꾸물거리는 병신 같은 습관을 버리고, 진짜 승자로 거듭나기 위한 행동 계획을 짜는 곳이다. 성공한 새끼들은 모두 아침을 지배한다. 왜? 아침에 그날의 승패가 갈리거든. 니가 밤에 뭘 했든, 얼마나 개지랄을 떨었든 상관없다. 아침에 눈 뜨는 순간 리셋하고 시작하는 거다. 이건 개똥철학이 아니라 과학이고 진리다. 똑바로 명심하고 따라와라.
+                        </p>
+                    </div>
+                </section>
+                
+                <!-- Explorer Tab -->
+                <section id="explorer" class="hidden fade-in">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-orange-700">그래서 뭘 해야 되는데? 핵심만 박아줄게!</h2>
+                        <p class="mt-2 text-stone-600">아래 6가지 핵심 루틴을 하나씩 눌러서 내용을 확인해라. 니 대가리에 뭐가 필요한지 똑똑히 새겨둬.</p>
+                    </div>
+                    <div class="lg:grid lg:grid-cols-3 lg:gap-8">
+                        <!-- Routine Cards -->
+                        <div id="routineCards" class="lg:col-span-1 space-y-4">
+                            <!-- Cards will be generated by JS -->
+                        </div>
+                        <!-- Routine Details -->
+                        <div class="lg:col-span-2 mt-6 lg:mt-0 p-6 bg-stone-100 rounded-lg min-h-[200px] flex items-center justify-center">
+                            <div id="routineDetail" class="prose prose-stone max-w-none">
+                                <p class="text-center text-stone-500">카드를 눌러서 자세한 내용을 봐라, 등신아.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Builder Tab -->
+                <section id="builder" class="hidden fade-in">
+                     <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-orange-700">결론? 닥치고 시작해!</h2>
+                        <p class="mt-2 text-stone-600">이 루틴들이 마법은 아니다. 매일 꾸준히 해야 니 인생이 바뀐다. 니가 원하는 삶을 살고 싶으면, 아래에서 실천할 루틴을 당장 선택하고 오늘부터 시작해라. 미루지 마, 씨발!</p>
+                    </div>
+                    <div class="md:grid md:grid-cols-2 md:gap-8 items-start">
+                        <!-- Chart -->
+                        <div class="mb-8 md:mb-0">
+                             <h3 class="text-xl font-bold text-center mb-4">나의 성공 루틴 현황판</h3>
+                             <div class="chart-container">
+                                <canvas id="routineChart"></canvas>
+                            </div>
+                        </div>
+                        <!-- Checklist -->
+                        <div>
+                            <h3 class="text-xl font-bold text-center mb-4">나만의 실천 체크리스트</h3>
+                            <div id="routineChecklist" class="space-y-3 bg-stone-100 p-6 rounded-lg">
+                                <!-- Checklist items will be generated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <footer class="text-center text-stone-500 text-sm mt-8">
+            <p>&copy; 2025. 모든 권리 내 맘대로.</p>
+            <p>이 앱은 독자의 각성과 행동을 촉구하기 위해 제작되었다.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const routines = [
+                { id: 1, icon: '🎯', title: '새벽 기상', subtitle: '아직도 침대랑 연애하냐?', content: '알람 끄고 다시 자는 게 취미냐? 성공하고 싶으면 새벽에 눈 떠! 5시? 6시? 니들이 생각하는 것보다 훨씬 일찍 일어난다. "아 피곤해요 ㅠㅠ" 이 지랄할 거면 그냥 포기해. 남들 잘 때 일어나서 니 할 일 다 해놓는 게 진짜 승자다. 처음엔 좀비 같아도, 적응되면 니 인생이 달라지는 걸 느낄 거야. 해보면 안다!' },
+                { id: 2, icon: '💪', title: '몸뚱이 움직이기', subtitle: '뇌도 근육도 썩는다!', content: '아침부터 헬스장 가서 쇠질하는 새끼도 있고, 집에서 푸쉬업 100개 조지는 새끼도 있다. 어쨌든 몸을 움직여야 돼. 혈액순환이 돼야 머리도 돌아가고, 잠도 확 달아난다. 유산소든 근력운동이든 뭐든 좋아. 땀 좀 흘려봐. 그럼 하루 종일 컨디션이 다르다. 해봤냐?' },
+                { id: 3, icon: '🧘', title: '명상/마음 정리', subtitle: '니 대가리 속 쓰레기부터 비워!', content: '"명상이요? 풉, 그게 뭔데요?" 이 지랄하는 새끼들 때문에 내가 화병 걸린다. 눈 감고 5분이라도 조용히 앉아봐. 잡생각 다 버리고 숨쉬는 거에 집중해 봐. 아니면 감사일기라도 써봐. 이게 별거 아닌 것 같지? 니 대가리 속 번잡한 쓰레기들을 비우고, 긍정적인 에너지를 채우는 거다. 하루를 씨발 소리 내면서 시작할래, 아니면 감사하면서 시작할래? 니 선택이다.' },
+                { id: 4, icon: '📝', title: '하루 계획 세우기', subtitle: '닥치고 써라, 써!', content: '아침에 눈 떠서 "오늘 뭐하지?" 이 지랄하는 새끼들 진짜 답 없다. 성공한 새끼들은 다 아침에 오늘 할 일 리스트업하고, 우선순위 정한다. 최소한 세 가지 중요한 일은 정해놔. 그거부터 조지는 거야. 계획도 없이 전장 나가는 병신이 어딨어? 니 계획이 니 승리의 지름길이다, 새꺄!' },
+                { id: 5, icon: '📚', title: '독서/학습', subtitle: '멍청하게 살지 마!', content: '스마트폰 보면서 인스타나 들여다볼 시간에 책 한 장이라도 더 읽어. 니 분야 전문 서적이든, 자기계발 서적이든, 뭐든 좋아. 아침에 뇌에 새롭고 좋은 정보를 채워 넣는 거야. 이게 쌓이면 나중에 니가 뭘 하든 존나 큰 자산이 된다. 멍청하게 살래?' },
+                { id: 6, icon: '🍳', title: '건강한 아침 식사', subtitle: '쓰레기 처먹지 마!', content: '아침에 굶거나, 편의점 빵 쪼가리 같은 쓰레기 처먹는 새끼들 반성해라. 니 몸이 니 자산이야, 병신아! 단백질, 탄수화물, 지방 균형 맞춰서 든든하게 먹어. 이게 니 뇌랑 몸뚱이에 연료를 공급하는 거야. 좋은 연료 넣어야 좋은 엔진이 되는 법이다. 귀찮다고? 그럼 계속 대충 살아!' }
+            ];
+
+            let selectedRoutines = [];
+            let routineChart;
+
+            const tabs = document.querySelectorAll('nav button');
+            const tabContents = {
+                intro: document.getElementById('intro'),
+                explorer: document.getElementById('explorer'),
+                builder: document.getElementById('builder')
+            };
+            const routineCardsContainer = document.getElementById('routineCards');
+            const routineDetailContainer = document.getElementById('routineDetail');
+            const routineChecklistContainer = document.getElementById('routineChecklist');
+            const chartCanvas = document.getElementById('routineChart');
+
+            function switchTab(tabName) {
+                tabs.forEach(tab => {
+                    if (tab.dataset.tab === tabName) {
+                        tab.classList.add('tab-active');
+                    } else {
+                        tab.classList.remove('tab-active');
+                    }
+                });
+
+                Object.values(tabContents).forEach(content => content.classList.add('hidden'));
+                if (tabContents[tabName]) {
+                    tabContents[tabName].classList.remove('hidden');
+                    tabContents[tabName].classList.add('fade-in');
+                }
+            }
+
+            function renderRoutineCards() {
+                routineCardsContainer.innerHTML = '';
+                routines.forEach(routine => {
+                    const card = document.createElement('div');
+                    card.className = 'p-4 bg-white border-2 border-stone-200 rounded-lg shadow-sm cursor-pointer hover:shadow-md hover:border-orange-400 transition-all duration-300';
+                    card.dataset.id = routine.id;
+                    card.innerHTML = `
+                        <div class="flex items-center">
+                            <span class="text-3xl mr-4">${routine.icon}</span>
+                            <div>
+                                <h3 class="font-bold text-lg">${routine.title}</h3>
+                                <p class="text-sm text-stone-500">${routine.subtitle}</p>
+                            </div>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => showRoutineDetail(routine.id));
+                    routineCardsContainer.appendChild(card);
+                });
+            }
+
+            function showRoutineDetail(id) {
+                const routine = routines.find(r => r.id === id);
+                document.querySelectorAll('#routineCards > div').forEach(card => {
+                    if (parseInt(card.dataset.id) === id) {
+                        card.classList.add('card-active');
+                    } else {
+                        card.classList.remove('card-active');
+                    }
+                });
+                routineDetailContainer.innerHTML = `
+                    <h3 class="text-xl font-bold mb-2">${routine.icon} ${routine.title}</h3>
+                    <p>${routine.content}</p>
+                `;
+            }
+
+            function renderChecklistAndChart() {
+                routineChecklistContainer.innerHTML = '';
+                if (routines.length === 0) return;
+                
+                routines.forEach(routine => {
+                    const isChecked = selectedRoutines.includes(routine.id);
+                    const item = document.createElement('div');
+                    item.className = 'flex items-center bg-white p-3 rounded-md shadow-sm';
+                    item.innerHTML = `
+                        <input type="checkbox" id="routine-${routine.id}" data-id="${routine.id}" class="h-5 w-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500" ${isChecked ? 'checked' : ''}>
+                        <label for="routine-${routine.id}" class="ml-3 text-stone-700">${routine.icon} ${routine.title}</label>
+                    `;
+                    routineChecklistContainer.appendChild(item);
+                });
+                updateChart();
+            }
+
+            function handleChecklistChange(e) {
+                if (e.target.type === 'checkbox') {
+                    const id = parseInt(e.target.dataset.id);
+                    if (e.target.checked) {
+                        if (!selectedRoutines.includes(id)) {
+                            selectedRoutines.push(id);
+                        }
+                    } else {
+                        selectedRoutines = selectedRoutines.filter(rid => rid !== id);
+                    }
+                    updateChart();
+                }
+            }
+            
+            function createChart() {
+                const ctx = chartCanvas.getContext('2d');
+                routineChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['실천할 루틴', '아직 안 할 루틴'],
+                        datasets: [{
+                            data: [0, routines.length],
+                            backgroundColor: ['#f97316', '#e7e5e4'],
+                            borderColor: ['#ffffff', '#ffffff'],
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        family: "'Noto Sans KR', sans-serif"
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                titleFont: { family: "'Noto Sans KR', sans-serif" },
+                                bodyFont: { family: "'Noto Sans KR', sans-serif" }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function updateChart() {
+                const selectedCount = selectedRoutines.length;
+                const remainingCount = routines.length - selectedCount;
+                routineChart.data.datasets[0].data = [selectedCount, remainingCount];
+                routineChart.update();
+            }
+
+            function init() {
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+                });
+                
+                renderRoutineCards();
+                createChart();
+                renderChecklistAndChart();
+
+                routineChecklistContainer.addEventListener('change', handleChecklistChange);
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
